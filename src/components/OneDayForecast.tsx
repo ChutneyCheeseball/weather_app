@@ -13,7 +13,7 @@ export const OneDayForecast = (props: { forecast: ForecastWeatherResponse }) => 
       style={{
         justifyContent: 'center',
         borderRadius: 12,
-        padding: 8,
+        padding: 12,
         marginHorizontal: 12,
         backgroundColor: 'rgba(10,10,10,0.6)',
         marginTop: 12
