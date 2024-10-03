@@ -5,7 +5,7 @@ export interface WeatherStyle {
   color: string
 }
 
-export interface CurrentWeather {
+export interface DisplayWeather {
   type: WeatherType
   min: number
   max: number
