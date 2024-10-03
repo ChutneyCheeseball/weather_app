@@ -3,43 +3,29 @@ import { Coordinates } from '../APIs/Location'
 import { useEffect, useState } from 'react'
 import { getCurrentWeather, getForecastWeather } from '../APIs/OpenWeatherMap'
 import { ForecastWeatherResponse } from '../types.ts/ForecastWeatherResponse'
-import { determineWeatherType } from '../utils'
+import { determineWeatherType, groupReadingsByDate } from '../utils'
+import { OneDayForecast } from './OneDayForecast'
+import { images } from '../assets'
+import { WeatherHeader } from './WeatherHeader'
+import { CurrentWeather, WeatherStyle, WeatherType } from '../types.ts/weather'
+import { WeekForecast } from './WeekForecast'
+import MapView, { MapMarker, Region } from 'react-native-maps'
 
-const sunnyImg = require('../../assets/images/forest_sunny.png')
-const cloudyImg = require('../../assets/images/forest_cloudy.png')
-const rainyImg = require('../../assets/images/forest_rainy.png')
-
-interface WeatherStyle {
-  img: any
-  color: string
-}
-
-type WeatherType = 'sunny' | 'cloudy' | 'rainy'
-
-interface Weather {
-  type: WeatherType
-  min: number
-  max: number
-  current: number
-  city: string
-}
-
-const getWeatherStyle = (type: WeatherType): WeatherStyle | null => {
+const getWeatherStyle = (type: WeatherType): WeatherStyle => {
   switch (type) {
     case 'sunny':
-      return { img: sunnyImg, color: '#47AB2F' }
+      return { img: images.sunny, color: '#47AB2F' }
     case 'cloudy':
-      return { img: cloudyImg, color: '#54717A' }
+      return { img: images.cloudy, color: '#54717A' }
     case 'rainy':
-      return { img: rainyImg, color: '#57575D' }
+      return { img: images.rainy, color: '#57575D' }
   }
-  return null
 }
 
 export const WeatherScreen = (props: { location: Coordinates | null }) => {
   const [busy, setBusy] = useState(false)
   const [weatherStyle, setWeatherStyle] = useState<WeatherStyle | null>(null)
-  const [weather, setWeather] = useState<Weather | null>(null)
+  const [weather, setWeather] = useState<CurrentWeather | null>(null)
   const [forecastWeather, setForecastWeather] = useState<ForecastWeatherResponse | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
@@ -56,21 +42,25 @@ export const WeatherScreen = (props: { location: Coordinates | null }) => {
       return
     }
     setBusy(true)
-    const currentWeather = await getCurrentWeather(location)
+    const MOCK_RESPONSE = true // For testing
+    const currentWeather = await getCurrentWeather(location, MOCK_RESPONSE)
     // Only get forecast weather if current weather was fetched OK
     if (currentWeather) {
       const weatherType = determineWeatherType(currentWeather.weather[0].id)
-      const weather: Weather = {
+      const weatherStyle = getWeatherStyle(weatherType)
+      setWeatherStyle(weatherStyle)
+
+      const current: CurrentWeather = {
         min: currentWeather.main.temp_min,
         max: currentWeather.main.temp_max,
         current: currentWeather.main.temp,
         type: weatherType,
-        city: currentWeather.name
+        city: currentWeather.name,
+        country: currentWeather.sys.country
       }
-      setWeather(weather)
-      const weatherStyle = getWeatherStyle(weatherType)
-      setWeatherStyle(weatherStyle)
-      const forecastWeather = await getForecastWeather(location, true)
+      setWeather(current)
+
+      const forecastWeather = await getForecastWeather(location, MOCK_RESPONSE)
       setForecastWeather(forecastWeather)
     }
     setBusy(false)
@@ -89,65 +79,33 @@ export const WeatherScreen = (props: { location: Coordinates | null }) => {
         </View>
       )
     }
+
     return (
-      <View style={{ backgroundColor: weatherStyle?.color, flex: 1 }}>
-        <ImageBackground
-          source={weatherStyle?.img}
-          style={{
-            width: '100%',
-            height: 'auto',
-            aspectRatio: 360 / 320,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <Text
-            style={{
-              color: 'white',
-              fontSize: 18,
-              position: 'absolute',
-              left: 12,
-              top: 6,
-              textShadowColor: 'rgba(0,0,0,0.5)',
-              textShadowOffset: { width: 0, height: 1 },
-              textShadowRadius: 1,
-              fontWeight: '500'
-            }}
-          >
-            {weather!.city.toUpperCase()}
-          </Text>
-          <Text
-            style={{
-              color: 'white',
-              fontSize: 48,
-              fontWeight: '500',
-              textShadowColor: 'rgba(0,0,0,0.5)',
-              textShadowOffset: { width: 0, height: 1 },
-              textShadowRadius: 1
-            }}
-          >
-            {Math.round(weather!.current)}°C
-          </Text>
-          <Text
-            style={{
-              color: 'white',
-              fontSize: 36,
-              marginTop: -16,
-              textShadowColor: 'rgba(0,0,0,0.5)',
-              textShadowOffset: { width: 0, height: 1 },
-              textShadowRadius: 1
-            }}
-          >
-            {weather!.type.toUpperCase()}
-          </Text>
-        </ImageBackground>
-        <View style={{ flex: 1, marginTop: -2, backgroundColor: weatherStyle?.color, paddingTop: 2 }}>
+      <View style={{ backgroundColor: weatherStyle!.color, flex: 1 }}>
+        <WeatherHeader weatherStyle={weatherStyle!} weather={weather!} />
+        <View style={{ flex: 1, marginTop: -2, backgroundColor: weatherStyle!.color, paddingTop: 8 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 12 }}>
             {renderCell(weather!.min, 'Min')}
             {renderCell(weather!.current, 'Current')}
             {renderCell(weather!.max, 'Max')}
           </View>
-          <View style={{ marginTop: 6, height: 1, width: '100%', backgroundColor: 'rgba(255,255,255,0.8)' }}></View>
+          {forecastWeather && <OneDayForecast forecast={forecastWeather} />}
+          {forecastWeather && <WeekForecast forecast={forecastWeather} />}
+          <View style={{ margin: 12, borderRadius: 12, backgroundColor: 'white', overflow: 'hidden' }}>
+            <MapView
+              style={{ width: '100%', height: 200 }}
+              region={
+                {
+                  latitude: location?.lat,
+                  longitude: location?.lon,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01
+                } as Region
+              }
+            >
+              <MapMarker coordinate={{ latitude: location!.lat, longitude: location!.lon }} />
+            </MapView>
+          </View>
         </View>
       </View>
     )
@@ -175,7 +133,7 @@ export const WeatherScreen = (props: { location: Coordinates | null }) => {
         />
       }
     >
-      {location && weather ? renderScreenContents() : <ActivityIndicator color="white" />}
+      {location && weather && weatherStyle ? renderScreenContents() : <ActivityIndicator color="white" />}
     </ScrollView>
   )
 }

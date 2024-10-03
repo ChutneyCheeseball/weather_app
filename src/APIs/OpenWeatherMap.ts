@@ -25,16 +25,16 @@ const weatherAPI = axios.create({
 // API logging
 // ---------------------------------------------------------------------------------------------------------------------
 
-weatherAPI.interceptors.request.use((config) => {
-  const URI = axios.getUri(config)
-  console.log(config.method!.toUpperCase(), URI)
-  return config
-})
+// weatherAPI.interceptors.request.use((config) => {
+//   const URI = axios.getUri(config)
+//   console.log(config.method!.toUpperCase(), URI)
+//   return config
+// })
 
-weatherAPI.interceptors.response.use((response) => {
-  console.log(response.status, JSON.stringify(response.data))
-  return response
-})
+// weatherAPI.interceptors.response.use((response) => {
+//   console.log(response.status, JSON.stringify(response.data))
+//   return response
+// })
 
 // ---------------------------------------------------------------------------------------------------------------------
 // The actual call to the API
