@@ -15,20 +15,20 @@ import { CurrentWeatherResponse } from './types.ts/CurrentWeatherResponse'
 import { ForecastWeatherResponse } from './types.ts/ForecastWeatherResponse'
 
 import { AddPlaceMap } from './components/AddPlaceMap'
-import { Coordinates } from './APIs/Location'
+import { Coordinates, getDeviceLocation } from './APIs/Location'
 import { getCurrentWeather, getForecastWeather } from './APIs/OpenWeatherMap'
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Our main application
 // ---------------------------------------------------------------------------------------------------------------------
 export default function App() {
-  const [placesData, setPlacesData] = useState<WeatherScreenProps[]>([
+  const [placesData, setPlacesData] = useState<Omit<WeatherScreenProps, 'onRefresh'>[]>([
     {
       id: '1',
       location: { lat: -25.8029342, lon: 28.300706 },
       currentWeather: mockCurrent as CurrentWeatherResponse,
       forecastWeather: mockForecast as ForecastWeatherResponse,
-      lastUpdated: new Date().getTime()
+      lastUpdated: mockCurrent.dt * 1000
     }
   ])
 
@@ -71,7 +71,29 @@ export default function App() {
     const newPlacesData = [...placesData]
     newPlacesData.splice(index, 1)
     setPlacesData(newPlacesData)
-    setSwiperIdx(swiperIdx - 1)
+    setSwiperIdx(index - 1)
+  }
+
+  const refreshPlace = async (index: number) => {
+    const currentPlace = placesData[index]
+    let location = (index === 0 ? await getDeviceLocation() : null) || currentPlace.location
+    const currentWeather = await getCurrentWeather(location)
+    if (currentWeather) {
+      const forecastWeather = await getForecastWeather(location)
+      if (forecastWeather) {
+        const newPlacesData = [...placesData]
+        newPlacesData[index] = {
+          ...currentPlace,
+          currentWeather,
+          forecastWeather,
+          lastUpdated: new Date().getTime(),
+          location
+        }
+        setPlacesData(newPlacesData)
+        return true
+      }
+    }
+    return false
   }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -100,6 +122,7 @@ export default function App() {
             key={JSON.stringify(data.id)}
             {...data}
             onDelete={index > 0 ? () => removePlace(index) : undefined}
+            onRefresh={() => refreshPlace(index)}
           />
         ))}
       </Swiper>
