@@ -51,7 +51,7 @@ const callWeatherAPI = async (api: 'weather' | 'forecast', location: Coordinates
       return response.data
     }
   } catch (error) {
-    console.error(error)
+    console.log(error)
   }
   return null
 }

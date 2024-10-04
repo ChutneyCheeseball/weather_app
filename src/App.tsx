@@ -51,7 +51,7 @@ export default function App() {
         }
       }
     } catch (error) {
-      console.error(error)
+      console.log(error)
       setShowManual(true)
     }
   }
@@ -62,7 +62,7 @@ export default function App() {
       await AsyncStorage.setItem('placesData', JSON.stringify(newPlacesData))
       console.log('OK')
     } catch (error) {
-      console.error(error)
+      console.log(error)
     }
   }
 

@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, Text, Modal, ActivityIndicator } from 'react-native'
+import { View, TouchableOpacity, Text, Modal, ActivityIndicator, ToastAndroid } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MapView, { MapMarker } from 'react-native-maps'
 import { Coordinates } from '../APIs/Location'
@@ -100,7 +100,12 @@ export const AddPlaceMap = ({ markers, visible, onClose, onAdd }: AddPlaceMapPro
                 setBusy(true)
                 const success = await onAdd(newPlace)
                 setBusy(false)
-                onClose()
+                if (success) {
+                  onClose()
+                  ToastAndroid.show('Added place', 2000)
+                } else {
+                  ToastAndroid.show('Could not add place', 2000)
+                }
               }}
             >
               {busy && <ActivityIndicator color="white" style={{ marginRight: 12 }} />}

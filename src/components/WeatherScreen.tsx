@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, RefreshControl } from 'react-native'
+import { View, Text, ScrollView, RefreshControl, ToastAndroid } from 'react-native'
 import { Coordinates } from '../APIs/Location'
 import { memo, useState } from 'react'
 import { ForecastWeatherResponse } from '../types.ts/ForecastWeatherResponse'
@@ -43,7 +43,12 @@ export const WeatherScreen = memo(
 
     const doRefresh = async () => {
       setRefreshing(true)
-      await onRefresh()
+      const success = await onRefresh()
+      if (success) {
+        ToastAndroid.show('Updated now', 2000)
+      } else {
+        ToastAndroid.show('Could not update', 2000)
+      }
       setRefreshing(false)
     }
 
