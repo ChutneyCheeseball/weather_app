@@ -34,6 +34,17 @@ The workspace was initiated with `npx create-expo-app@latest --template blank-ty
 
 ## Getting started
 
+### Installing directly from the .APK
+
+A pre-built APK is available here:\
+https://expo.dev/accounts/dylandutoit/projects/weather-app/builds/7ed3c5a6-2e74-41c8-b533-d6af00b793ad
+
+Click on the context icon (3 dots) and select "Download build".
+
+You may have to grant the browser / file manager on your phone permissions to install apps from an unofficial source.
+
+### Running the project through the development environment
+
 **An Android device or emulator is required for running the application.**
 
 This guide assumes a working development environment with Android Studio, Java, `npx`, etc. already installed and configured. Setting up the dev environment is beyond the scope of this document, however you may refer to [Set up your environment](https://docs.expo.dev/get-started/set-up-your-environment/) in the Expo documentation.
@@ -68,6 +79,16 @@ Starting Metro Bundler
 ```
 
 Follow the prompts to install [Expo Go](https://expo.dev/go) on the emulator/device.
+
+## Building the project
+
+To build the project locally, you need to have the Expo Application Services ([EAS](https://expo.dev/eas)) installed.
+
+```
+eas build --platform android --profile preview
+```
+
+Note that this will require you to provide a value for `${GOOGLE_MAPS_API_KEY}` in `app.json`.
 
 ## The development process
 
