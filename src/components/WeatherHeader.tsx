@@ -43,7 +43,7 @@ export const WeatherHeader = ({ displayWeather, weatherStyle, onDelete }: Weathe
             ...styles.shadowedText
           }}
         >
-          {displayWeather.city.toUpperCase()}, {displayWeather.country}
+          {displayWeather.city.toUpperCase()}, {displayWeather.timezone}
         </Text>
         {onDelete && (
           <TouchableOpacity

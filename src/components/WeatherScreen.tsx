@@ -49,13 +49,15 @@ export const WeatherScreen = memo(
 
     const weatherType = determineWeatherType(currentWeather.weather[0].id)
     const weatherStyle = getWeatherStyle(weatherType)
+    const timezone = currentWeather.timezone / 60 / 60
     const displayWeather: DisplayWeather = {
       min: currentWeather.main.temp_min,
       max: currentWeather.main.temp_max,
       current: currentWeather.main.temp,
       type: weatherType,
       city: currentWeather.name || `(${currentWeather.coord.lat.toFixed(4)}, ${currentWeather.coord.lon.toFixed(4)})`,
-      country: currentWeather.sys.country
+      country: currentWeather.sys.country,
+      timezone: `GMT${timezone > 0 ? '+' : ''}${timezone}`
     }
 
     // -------------------------------------------------------------------------------------------------------------------
@@ -84,8 +86,12 @@ export const WeatherScreen = memo(
               {renderCell(displayWeather!.current, 'Current')}
               {renderCell(displayWeather!.max, 'Max')}
             </View>
-            <OneDayForecast forecast={forecastWeather} />
-            <WeekForecast forecast={forecastWeather} />
+            {forecastWeather && (
+              <>
+                <OneDayForecast forecast={forecastWeather} />
+                <WeekForecast forecast={forecastWeather} />
+              </>
+            )}
             <View style={{ margin: 12, borderRadius: 12, backgroundColor: 'white', overflow: 'hidden' }}>
               <MapView
                 style={{ width: '100%', height: 200 }}

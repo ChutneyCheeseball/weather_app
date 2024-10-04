@@ -12,4 +12,5 @@ export interface DisplayWeather {
   current: number
   city: string
   country: string
+  timezone: string
 }

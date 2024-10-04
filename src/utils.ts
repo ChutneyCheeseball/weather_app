@@ -1,4 +1,4 @@
-import { addHours, addSeconds, fromUnixTime } from 'date-fns'
+import { addHours, format, fromUnixTime } from 'date-fns'
 import { ForecastReading, ForecastWeatherResponse } from './types.ts/ForecastWeatherResponse'
 import { WeatherType } from './types.ts/weather'
 
@@ -32,20 +32,32 @@ export const determineWeatherType = (weatherId: number) => {
 // -------------------------------------------------------------------------------------------------------------------
 export const getOneDayForecast = (forecastData: ForecastWeatherResponse) => {
   const oneDay = forecastData.list.slice(0, 8)
-  return oneDay
-  // return oneDay.map((reading) => {
-  //   // We want to include timezone (as e.g. UTC+2) and local time in reading
-  //   const timezoneOffset = forecastData.city.timezone
-  //   const timezoneHours = timezoneOffset / 60 / 60
-  //   const timezone = `UTC${timezoneOffset > 0 ? '+' : ''}${timezoneHours}`
-  //   const date = addHours(fromUnixTime(reading.dt), timezoneHours)
-  //   const localTime = String(date.getUTCHours()).padStart(2, '0') + ':00'
-  //   return {
-  //     ...reading,
-  //     timezone,
-  //     localTime
-  //   }
-  // })
+  return oneDay.map((reading) => {
+    const converted = convertDT(forecastData.city.timezone, reading.dt)
+    console.log(reading.dt_txt, forecastData.city.timezone / 60 / 60, converted)
+    return {
+      ...reading,
+      dt_txt: converted
+    }
+  })
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// Convert dt_txt from UTC time to local time
+// -------------------------------------------------------------------------------------------------------------------
+export const convertDT = (timezoneOffset: number, dt: number) => {
+  // Add timezone offset to UTC Date
+  const timezoneHours = timezoneOffset / 60 / 60
+  const zonedDate = addHours(fromUnixTime(dt), timezoneHours)
+  // Bypass system timezone
+  const year = zonedDate.getUTCFullYear()
+  const month = String(zonedDate.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(zonedDate.getUTCDate()).padStart(2, '0')
+  const hours = String(zonedDate.getUTCHours()).padStart(2, '0')
+  const minutes = String(zonedDate.getUTCMinutes()).padStart(2, '0')
+  const seconds = String(zonedDate.getUTCSeconds()).padStart(2, '0')
+  const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+  return formattedDate
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -54,11 +66,12 @@ export const getOneDayForecast = (forecastData: ForecastWeatherResponse) => {
 export const groupReadingsByDate = (forecastData: ForecastWeatherResponse) => {
   const grouped: { [key: string]: ForecastReading[] } = {}
   for (const reading of forecastData.list) {
-    const date = reading.dt_txt.split(' ')[0]
+    const converted = { ...reading, dt_txt: convertDT(forecastData.city.timezone, reading.dt) }
+    const date = converted.dt_txt.split(' ')[0]
     if (grouped[date]) {
-      grouped[date].push(reading)
+      grouped[date].push(converted)
     } else {
-      grouped[date] = [reading]
+      grouped[date] = [converted]
     }
   }
   return grouped
