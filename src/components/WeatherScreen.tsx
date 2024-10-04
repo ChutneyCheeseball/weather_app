@@ -57,7 +57,7 @@ export const WeatherScreen = memo(
       type: weatherType,
       city: currentWeather.name || `(${currentWeather.coord.lat.toFixed(4)}, ${currentWeather.coord.lon.toFixed(4)})`,
       country: currentWeather.sys.country,
-      timezone: `GMT${timezone > 0 ? '+' : ''}${timezone}`
+      timezone: `GMT${timezone >= 0 ? '+' : ''}${timezone}`
     }
 
     // -------------------------------------------------------------------------------------------------------------------

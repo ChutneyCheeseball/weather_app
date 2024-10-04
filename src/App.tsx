@@ -92,8 +92,18 @@ export default function App() {
 
   const refreshPlace = async (index: number) => {
     const currentPlace = placesData[index]
-    // The first screen shows our device location, so refreshing it requires a location update
-    let location = (index === 0 ? await getDeviceLocation() : null) || currentPlace.location
+    let location: Coordinates | null = null
+    // Refresh location if this is our home location
+    if (index === 0) {
+      location = await getDeviceLocation()
+    }
+    if (location === null) {
+      if (currentPlace) {
+        location = currentPlace.location
+      } else {
+        return false
+      }
+    }
     const currentWeather = await getCurrentWeather(location)
     if (currentWeather) {
       const forecastWeather = await getForecastWeather(location)
@@ -213,7 +223,11 @@ export default function App() {
         <Ionicons name="add" color="white" size={48} />
       </TouchableOpacity>
 
-      <TouchableOpacity
+      {/* 
+      
+        This was for testing the clearing of AsyncStorage
+        
+        <TouchableOpacity
         style={{
           position: 'absolute',
           left: 32,
@@ -234,7 +248,7 @@ export default function App() {
         }}
       >
         <Ionicons name="trash" color="white" size={48} />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <AddPlaceMap
         visible={placesDialogOpen}
