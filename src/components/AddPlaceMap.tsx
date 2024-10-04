@@ -3,6 +3,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import MapView, { MapMarker } from 'react-native-maps'
 import { Coordinates } from '../APIs/Location'
 import { useEffect, useState } from 'react'
+import { PROVIDER_GOOGLE } from 'react-native-maps'
 
 interface AddPlaceMapProps {
   visible: boolean
@@ -44,6 +45,7 @@ export const AddPlaceMap = ({ markers, visible, onClose, onAdd }: AddPlaceMapPro
           <View style={{ flex: 1 }} />
         </View>
         <MapView
+          provider={PROVIDER_GOOGLE}
           rotateEnabled={false}
           style={{ flex: 1 }}
           toolbarEnabled={false}

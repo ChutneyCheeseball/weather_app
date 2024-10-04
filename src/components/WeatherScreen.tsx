@@ -11,6 +11,7 @@ import { WeekForecast } from './WeekForecast'
 import MapView, { MapMarker, Region } from 'react-native-maps'
 import { CurrentWeatherResponse } from '../types.ts/CurrentWeatherResponse'
 import { format } from 'date-fns'
+import { PROVIDER_GOOGLE } from 'react-native-maps'
 
 export interface WeatherScreenProps {
   id: string
@@ -99,6 +100,7 @@ export const WeatherScreen = memo(
             )}
             <View style={{ margin: 12, borderRadius: 12, backgroundColor: 'white', overflow: 'hidden' }}>
               <MapView
+                provider={PROVIDER_GOOGLE}
                 style={{ width: '100%', height: 200 }}
                 region={
                   {
